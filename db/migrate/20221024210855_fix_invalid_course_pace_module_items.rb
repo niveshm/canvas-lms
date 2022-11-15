@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 #
-# Copyright (C) 2013 - present Instructure, Inc.
+# Copyright (C) 2022 - present Instructure, Inc.
 #
 # This file is part of Canvas.
 #
@@ -15,14 +17,15 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import InputView from 'backbone-input-view'
+class FixInvalidCoursePaceModuleItems < ActiveRecord::Migration[6.1]
+  tag :postdeploy
 
-export default class SelectView extends InputView
+  def self.up
+    DataFixup::RemoveInvalidCoursePaceModuleItems.delay_if_production(
+      priority: Delayed::LOW_PRIORITY,
+      n_strand: "long_datafixups"
+    ).run
+  end
 
-  tagName: 'select'
-
-  className: 'select-view'
-
-  events:
-    'change': 'updateModel'
-
+  def self.down; end
+end

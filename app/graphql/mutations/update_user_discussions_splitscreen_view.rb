@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 #
-# Copyright (C) 2013 - present Instructure, Inc.
+# Copyright (C) 2022 - present Instructure, Inc.
 #
 # This file is part of Canvas.
 #
@@ -14,11 +16,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
+#
 
-import User from '@canvas/users/backbone/models/User.coffee'
+class Mutations::UpdateUserDiscussionsSplitscreenView < Mutations::BaseMutation
+  graphql_name "UpdateUserDiscussionsSplitscreenView"
 
-export default class AccountUser extends User
+  argument :discussions_splitscreen_view, Boolean, required: true
 
-  defaults:
-    avatar_url: '/images/messages/avatar-50.png'
+  field :user, Types::UserType, null: false
+  def resolve(input:)
+    current_user.preferences[:discussions_splitscreen_view] = input[:discussions_splitscreen_view]
+    current_user.save!
 
+    {
+      user: current_user.reload
+    }
+  end
+end

@@ -263,6 +263,7 @@ const SplitScreenThreadContainer = props => {
       variables: {
         discussionEntryId: props.discussionEntry._id,
         message,
+        fileId,
         removeAttachment: !fileId,
       },
     })
@@ -274,7 +275,6 @@ const SplitScreenThreadContainer = props => {
         key={`reply-${props.discussionEntry.id}`}
         authorName={getDisplayName(props.discussionEntry)}
         delimiterKey={`reply-delimiter-${props.discussionEntry.id}`}
-        isIsolatedView={true}
         onClick={() =>
           props.onOpenSplitScreenView(
             props.discussionEntry._id,

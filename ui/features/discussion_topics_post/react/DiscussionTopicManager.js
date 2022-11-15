@@ -124,7 +124,7 @@ const DiscussionTopicManager = props => {
   }, [highlightEntryId])
 
   const openView = (discussionEntryId, isolatedId, withRCE, relativeId = null) => {
-    setReplyFromId(discussionEntryId)
+    ENV.isolated_view ? setReplyFromId(discussionEntryId) : setReplyFromId(null)
     setIsolatedEntryId(isolatedId || discussionEntryId)
     if (ENV.isolated_view) {
       setIsolatedViewOpen(true)
@@ -306,11 +306,12 @@ const DiscussionTopicManager = props => {
             <DiscussionTopicContainer
               updateDraftCache={updateDraftCache}
               discussionTopic={discussionTopicQuery.data.legacyNode}
-              createDiscussionEntry={(message, isAnonymousAuthor) => {
+              createDiscussionEntry={(message, fileId, isAnonymousAuthor) => {
                 createDiscussionEntry({
                   variables: {
                     discussionTopicId: ENV.discussion_topic_id,
                     message,
+                    fileId,
                     courseID: ENV.course_id,
                     isAnonymousAuthor,
                   },

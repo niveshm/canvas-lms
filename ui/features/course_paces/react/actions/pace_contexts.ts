@@ -18,7 +18,7 @@
 
 import {createAction, ActionsUnion} from '../shared/types'
 import * as Api from '../api/pace_contexts_api'
-import {APIPaceContextTypes, StoreState} from '../types'
+import {APIPaceContextTypes, PaceContext, StoreState} from '../types'
 import {ThunkAction} from 'redux-thunk'
 import {Action} from 'redux'
 import {useScope as useI18nScope} from '@canvas/i18n'
@@ -28,22 +28,31 @@ const I18n = useI18nScope('pace_contexts_actions')
 export enum Constants {
   SET_PACE_CONTEXTS = 'PACE_CONTEXTS/SET_PACE_CONTEXTS',
   SET_SELECTED_PACE_CONTEXT_TYPE = 'PACE_CONTEXTS/SET_SELECTED_PACE_CONTEXT_TYPE',
+  SET_SELECTED_PACE_CONTEXT = 'PACE_CONTEXTS/SET_SELECTED_PACE_CONTEXT',
   SET_PAGE = 'PACE_CONTEXTS/SET_PAGE',
   SET_LOADING = 'PACE_CONTEXTS/SET_LOADING',
   SET_DEFAULT_PACE_LOADING = 'PACE_CONTEXTS/DEFAULT/SET_LOADING',
   SET_DEFAULT_PACE_CONTEXT = 'PACE_CONTEXTS/DEFAULT/SET_PACE_CONTEXT',
+  SET_DEFAULT_PACE_CONTEXT_AS_SELECTED = 'PACE_CONTEXTS/DEFAULT/SET_PACE_CONTEXT_AS_SELECTED',
+  SET_SEARCH_TERM = 'PACE_CONTEXTS/SET_SEARCH_TERM',
 }
 
 const regularActions = {
   setPage: (page: number) => createAction(Constants.SET_PAGE, page),
-  setSelectedContextType: (paceContext: APIPaceContextTypes) =>
-    createAction(Constants.SET_SELECTED_PACE_CONTEXT_TYPE, paceContext),
+  setSelectedContextType: (paceContextType: APIPaceContextTypes) =>
+    createAction(Constants.SET_SELECTED_PACE_CONTEXT_TYPE, paceContextType),
+  setSelectedContext: (paceContext: PaceContext) =>
+    createAction(Constants.SET_SELECTED_PACE_CONTEXT, paceContext),
+  setDefaultPaceContextAsSelected: () =>
+    createAction(Constants.SET_DEFAULT_PACE_CONTEXT_AS_SELECTED),
+  setSearchTerm: (searchTerm: string) => createAction(Constants.SET_SEARCH_TERM, searchTerm),
 }
 
 const thunkActions = {
   fetchPaceContexts: (
     contextType: APIPaceContextTypes,
-    page: number = 1
+    page: number = 1,
+    searchTerm: string = ''
   ): ThunkAction<void, StoreState, void, Action> => {
     return async (dispatch, getState) => {
       dispatch(createAction(Constants.SET_LOADING, true))
@@ -52,7 +61,8 @@ const thunkActions = {
         coursePace.course_id,
         contextType,
         page,
-        paceContexts.entriesPerRequest
+        paceContexts.entriesPerRequest,
+        searchTerm
       )
       if (!response?.pace_contexts) throw new Error(I18n.t('Response body was empty'))
       dispatch(createAction(Constants.SET_PACE_CONTEXTS, {result: response, page}))

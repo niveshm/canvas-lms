@@ -19,8 +19,7 @@
 import React, {useEffect, useState} from 'react'
 import {useScope as useI18nScope} from '@canvas/i18n'
 import {Table} from '@instructure/ui-table'
-import {PaceContext, APIPaceContextTypes, PaceContextTypes, ResponsiveSizes} from '../types'
-import {dateString} from '@canvas/datetime/date-functions'
+import {PaceContext, APIPaceContextTypes, ResponsiveSizes} from '../types'
 import {Flex} from '@instructure/ui-flex'
 import {Text} from '@instructure/ui-text'
 import {View} from '@instructure/ui-view'
@@ -28,6 +27,7 @@ import {Link} from '@instructure/ui-link'
 import {TruncateText} from '@instructure/ui-truncate-text'
 import {Spinner} from '@instructure/ui-spinner'
 import Paginator from '@canvas/instui-bindings/react/Paginator'
+import {formatTimeAgoDate} from '../utils/date_stuff/date_helpers'
 
 const I18n = useI18nScope('course_paces_app')
 
@@ -39,7 +39,7 @@ export interface PaceContextsTableProps {
   isLoading: boolean
   responsiveSize: ResponsiveSizes
   setPage: (page: number) => void
-  handleContextSelect: (contextType: PaceContextTypes, contextId: string) => void
+  handleContextSelect: (paceContext: PaceContext) => void
 }
 
 interface Header {
@@ -51,12 +51,6 @@ const PACE_TYPES = {
   StudentEnrollment: I18n.t('Individual'),
   CourseSection: I18n.t('Section'),
   Course: I18n.t('Default'),
-}
-
-export const CONTEXT_TYPE_MAP: {[k in APIPaceContextTypes]: PaceContextTypes} = {
-  course: 'Course',
-  section: 'Section',
-  student_enrollment: 'Enrollment',
 }
 
 const {Item: FlexItem} = Flex as any
@@ -88,7 +82,7 @@ const PaceContextsTable = ({
   const formatDate = (date: string) => {
     if (!date) return '--'
 
-    return dateString(date, {format: 'full'})
+    return formatTimeAgoDate(date)
   }
 
   const getHeaderByContextType = () => {
@@ -117,10 +111,7 @@ const PaceContextsTable = ({
   }
 
   const renderContextLink = (paceContext: PaceContext) => (
-    <Link
-      isWithinText={false}
-      onClick={() => handleContextSelect(CONTEXT_TYPE_MAP[contextType], paceContext.item_id)}
-    >
+    <Link isWithinText={false} onClick={() => handleContextSelect(paceContext)}>
       <TruncateText>{paceContext.name}</TruncateText>
     </Link>
   )
@@ -183,7 +174,7 @@ const PaceContextsTable = ({
   const renderRow = (paceContext: PaceContext) => {
     const rowCells = getValuesByContextType(paceContext)
     return (
-      <TableRow key={paceContext.item_id}>
+      <TableRow data-testid="course-pace-row" key={paceContext.item_id}>
         {rowCells.map((cell, index) => (
           <TableCell
             data-testid="course-pace-item"
@@ -235,7 +226,7 @@ const PaceContextsTable = ({
           {paceContexts.map((paceContext: PaceContext) => renderMobileRow(paceContext))}
         </View>
       ) : (
-        <View as="div" margin="large none" borderWidth="small small none small">
+        <View as="div" margin="none none large none" borderWidth="small small none small">
           <Table
             data-testid="course-pace-context-table"
             caption={I18n.t('Course Paces Table')}
@@ -250,7 +241,14 @@ const PaceContextsTable = ({
           </Table>
         </View>
       )}
-      {pageCount > 1 && <Paginator loadPage={setPage} page={currentPage} pageCount={pageCount} />}
+      {pageCount > 1 && (
+        <Paginator
+          data-testid="context-table-paginator"
+          loadPage={setPage}
+          page={currentPage}
+          pageCount={pageCount}
+        />
+      )}
     </>
   )
 }

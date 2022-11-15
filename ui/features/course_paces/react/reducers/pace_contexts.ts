@@ -16,11 +16,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {PaceContextsState} from '../types'
+import {PaceContext, PaceContextsState, StoreState} from '../types'
 import {Constants as PaceContextsConstants} from '../actions/pace_contexts'
 
 export const paceContextsInitialState: PaceContextsState = {
   selectedContextType: 'section',
+  selectedContext: null,
   entries: [],
   pageCount: 1,
   page: 1,
@@ -28,7 +29,11 @@ export const paceContextsInitialState: PaceContextsState = {
   isLoading: true,
   defaultPaceContext: null,
   isLoadingDefault: false,
+  searchTerm: '',
 }
+
+export const getSelectedPaceContext = (state: StoreState): PaceContext | null =>
+  state.paceContexts.selectedContext
 
 export const paceContextsReducer = (
   state = paceContextsInitialState,
@@ -70,6 +75,21 @@ export const paceContextsReducer = (
         ...state,
         defaultPaceContext: action.payload.result,
         isLoadingDefault: false,
+      }
+    case PaceContextsConstants.SET_SELECTED_PACE_CONTEXT:
+      return {
+        ...state,
+        selectedContext: action.payload,
+      }
+    case PaceContextsConstants.SET_DEFAULT_PACE_CONTEXT_AS_SELECTED:
+      return {
+        ...state,
+        selectedContext: state.defaultPaceContext,
+      }
+    case PaceContextsConstants.SET_SEARCH_TERM:
+      return {
+        ...state,
+        searchTerm: action.payload,
       }
     default:
       return state
